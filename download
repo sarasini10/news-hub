@@ -1,0 +1,11 @@
+tools/
+*.exe
+*.ico
+*.cs
+*.apk
+android-project/
+*.bat
+.git
+data/desktop_profile/
+Dockerfile
+.dockerignore

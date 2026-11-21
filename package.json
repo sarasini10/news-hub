@@ -1,0 +1,24 @@
+{
+  "name": "news-intelligence-hub",
+  "version": "1.0.0",
+  "description": "NEWS INTELLIGENCE HUB - Piattaforma personale di intelligence informativa, ricerca e archiviazione",
+  "main": "server/app.js",
+  "scripts": {
+    "start": "node --experimental-sqlite server/app.js"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "keywords": [
+    "news",
+    "intelligence",
+    "archive",
+    "search",
+    "openalex",
+    "pubmed",
+    "rss",
+    "romagna"
+  ],
+  "author": "News Intelligence Team",
+  "license": "ISC"
+}

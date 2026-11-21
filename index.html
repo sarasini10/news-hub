@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="it" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>NEWS INTELLIGENCE HUB - Piattaforma di Intelligence e Archiviazione</title>
+  
+  <!-- PWA & Favicon -->
+  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/svg+xml" href="/icons/icon-192.svg">
+  <meta name="theme-color" content="#1e3a8a">
+  <meta name="description" content="Piattaforma personale di intelligence informativa, ricerca e archiviazione cronologica.">
+
+  <!-- Stili -->
+  <link rel="stylesheet" href="/css/style.css">
+  <link rel="stylesheet" href="/css/intelligence.css">
+</head>
+<body>
+
+  <!-- BARRA DI NAVIGAZIONE SUPERIORE -->
+  <header class="navbar">
+    <div class="navbar-inner">
+      
+      <!-- Brand & Logo -->
+      <div class="brand-section" title="Torna alla Dashboard">
+        <div class="brand-logo">
+          <svg viewBox="0 0 24 24">
+            <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1 17.93c-3.95-.49-7-3.85-7-7.93 0-.62.08-1.21.21-1.79L9 15v1c0 1.1.9 2 2 2v1.93zm6.9-2.54c-.26-.81-1-1.39-1.9-1.39h-1v-3c0-.55-.45-1-1-1H8v-2h2c.55 0 1-.45 1-1V7h2c1.1 0 2-.9 2-2v-.41c2.93 1.19 5 4.06 5 7.41 0 2.08-.8 3.97-2.1 5.39z"/>
+          </svg>
+        </div>
+        <div>
+          <div class="brand-title">NEWS INTELLIGENCE HUB</div>
+          <div class="brand-subtitle">Intelligence & Archiviazione Personale</div>
+        </div>
+      </div>
+
+      <!-- Ricerca Intelligente Trasversale nell'Archivio -->
+      <div class="search-header-container">
+        <div class="search-input-wrapper">
+          <span class="search-icon-left">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+          </span>
+          <input
+            type="text"
+            id="global-search-input"
+            class="search-input-global"
+            placeholder="RICERCA INTELLIGENTE NELL'ARCHIVIO (premi INVIO)..."
+            title="Cerca per parole chiave, frasi esatte, persone, temi o date nell'intero archivio"
+          >
+          <span class="search-shortcut-hint">/</span>
+        </div>
+      </div>
+
+      <!-- Controlli & Navigazione -->
+      <div class="nav-actions">
+        <!-- Pulsante Principale "AGGIORNA TUTTE LE NEWS" -->
+        <button id="btn-refresh-all" class="btn-refresh-all" title="Avvia la scansione e l'aggiornamento su tutte le 8 categorie">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/>
+          </svg>
+          <span>AGGIORNA TUTTE LE NEWS</span>
+        </button>
+
+        <button class="btn btn-primary" data-view-target="dashboard" title="Dashboard Categorie">
+          📊 Dashboard
+        </button>
+
+        <button class="btn btn-secondary" data-view-target="archive" title="Archivio Cronologico Anno / Mese / Giorno">
+          📁 Archivio
+        </button>
+
+        <button class="btn btn-secondary" data-view-target="search" title="Ricerca Trasversale Approfondita">
+          🔍 Ricerca
+        </button>
+
+        <button class="btn btn-secondary" data-view-target="settings" title="Impostazioni e Gestione Fonti">
+          ⚙️ Impostazioni
+        </button>
+
+        <button class="btn btn-secondary" data-view-target="android" title="Installa su Android e accesso remoto" style="background:linear-gradient(135deg,#4ade80,#22c55e);color:#000;font-weight:700;">
+          📱 Android
+        </button>
+
+        <!-- Toggle Tema Chiaro / Scuro -->
+        <button id="btn-toggle-theme" class="btn-icon-only" title="Cambia tema chiaro/scuro">
+          <span id="theme-icon">☀️</span>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- CONTENITORE PRINCIPALE APP -->
+  <main class="app-container">
+
+    <!-- BARRA DI AVANZAMENTO AGGIORNAMENTO IN TEMPO REALE -->
+    <div id="progress-live-bar" class="progress-live-bar">
+      <div class="progress-header">
+        <div class="progress-title-section">
+          <div class="progress-spinner"></div>
+          <strong id="progress-status-title">Aggiornamento in corso...</strong>
+        </div>
+        <div class="progress-stats-chips">
+          <span class="stat-chip">Categoria: <strong id="progress-stat-cat">-</strong></span>
+          <span class="stat-chip">Trovati: <strong id="progress-stat-found">0</strong></span>
+          <span class="stat-chip">Nuovi archiviati: <strong id="progress-stat-added">0</strong></span>
+        </div>
+      </div>
+      <div class="progress-track">
+        <div id="progress-fill" class="progress-fill"></div>
+      </div>
+      <div id="progress-detail-text" class="progress-detail-text">
+        <span>In attesa delle fonti...</span>
+      </div>
+    </div>
+
+    <!-- ========================================== -->
+    <!-- 1. VISTA DASHBOARD (HOME PAGE)             -->
+    <!-- ========================================== -->
+    <section id="view-dashboard" class="view-section active-view">
+      
+      <!-- KPI Intelligence Panoramica -->
+      <div class="intelligence-kpi-grid">
+        <div class="kpi-card">
+          <div class="kpi-icon" style="color: #38bdf8;">📰</div>
+          <div class="kpi-data">
+            <span id="kpi-total-articles" class="kpi-val">0</span>
+            <span class="kpi-label">Contenuti Archiviati</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="color: #ef4444;">🔥</div>
+          <div class="kpi-data">
+            <span id="kpi-unread-articles" class="kpi-val">0</span>
+            <span class="kpi-label">Nuove Notizie Recenti</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="color: #10b981;">📡</div>
+          <div class="kpi-data">
+            <span id="kpi-active-sources" class="kpi-val">0</span>
+            <span class="kpi-label">Fonti Web & Scientifiche</span>
+          </div>
+        </div>
+
+        <div class="kpi-card">
+          <div class="kpi-icon" style="color: #f59e0b;">⏰</div>
+          <div class="kpi-data">
+            <span id="kpi-last-update" class="kpi-val" style="font-size: 1.15rem;">-</span>
+            <span class="kpi-label">Ultimo Aggiornamento</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Griglia dei Contenitori delle 8 Categorie Principali -->
+      <div id="categories-grid" class="categories-dashboard-grid">
+        <!-- Generato dinamicamente da app.js -->
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 2. VISTA ARCHIVIO CRONOLOGICO             -->
+    <!-- ========================================== -->
+    <section id="view-archive" class="view-section">
+      
+      <!-- Filtri Categorie Chip -->
+      <div id="archive-category-chips" class="category-filter-chips">
+        <button class="cat-chip active" data-cat="tutte">🌐 Tutte le Categorie</button>
+        <button class="cat-chip" data-cat="politica">🏛️ Politica</button>
+        <button class="cat-chip" data-cat="sport">🏅 Sport</button>
+        <button class="cat-chip" data-cat="religione">✝️ Religione Cattolica</button>
+        <button class="cat-chip" data-cat="ricerca">🔬 Ricerca Scientifica</button>
+        <button class="cat-chip" data-cat="economia">📈 Economia</button>
+        <button class="cat-chip" data-cat="medicina">🩺 Medicina e Salute</button>
+        <button class="cat-chip" data-cat="interazioni">🧠 Interazioni Umane</button>
+        <button class="cat-chip" data-cat="romagna">📍 Territorio Romagna</button>
+      </div>
+
+      <div class="archive-layout">
+        <!-- Barra Laterale: Albero Anno -> Mese -> Giorno -->
+        <aside class="archive-tree-sidebar">
+          <div class="tree-section-title">
+            <span>Cronologia Archivio</span>
+            <span>📂</span>
+          </div>
+          <div id="archive-tree-container">
+            <!-- Albero cronologico generato dinamicamente -->
+          </div>
+        </aside>
+
+        <!-- Area Principale Articoli dell'Archivio -->
+        <div class="archive-main-content">
+          <div class="archive-view-header">
+            <div class="archive-title-group">
+              <h2 id="archive-current-filter-title">Archivio Cronologico</h2>
+              <p>Consultazione permanente, navigazione giornaliera e conservazione delle fonti</p>
+            </div>
+            
+            <div style="display: flex; gap: 8px; align-items: center;">
+              <input
+                type="text"
+                id="archive-internal-search"
+                class="form-input"
+                style="padding: 6px 12px; font-size: 0.82rem; width: 220px;"
+                placeholder="Cerca nell'archivio..."
+              >
+              <button id="btn-export-json" class="btn btn-secondary btn-sm" title="Esporta in formato JSON">
+                📥 JSON
+              </button>
+              <button id="btn-export-csv" class="btn btn-secondary btn-sm" title="Esporta in formato CSV / Excel">
+                📊 CSV
+              </button>
+            </div>
+          </div>
+
+          <div id="archive-articles-list" class="articles-full-list">
+            <!-- Articoli caricati dinamicamente -->
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 3. VISTA RICERCA TRASVERSALE               -->
+    <!-- ========================================== -->
+    <section id="view-search" class="view-section">
+      <div class="archive-main-content" style="max-width: 1200px; margin: 0 auto;">
+        
+        <div class="archive-view-header">
+          <div class="archive-title-group">
+            <h2>Ricerca Intelligente Trasversale</h2>
+            <p>Interroga simultaneamente tutte le 8 categorie e l'intero archivio storico</p>
+          </div>
+          <span id="search-stats-badge" class="stat-chip" style="font-size: 0.82rem;">0 risultati</span>
+        </div>
+
+        <!-- Barra di Ricerca Avanzata -->
+        <div style="display: flex; gap: 10px; margin-bottom: 18px;">
+          <input
+            type="text"
+            id="search-view-input"
+            class="form-input"
+            style="font-size: 1.05rem; padding: 12px 18px;"
+            placeholder="Digita parole chiave, argomenti, persone, luoghi (es. Forlì, intelligenza artificiale, longevità)..."
+          >
+          <button id="btn-exec-search" class="btn btn-primary" style="padding: 12px 24px; font-size: 0.95rem;">
+            🔍 Cerca
+          </button>
+        </div>
+
+        <!-- Barra Filtri Dinamici -->
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 22px; padding: 14px; background: var(--bg-surface); border-radius: var(--radius-md); align-items: end;">
+          <div>
+            <label class="form-label" style="font-size: 0.74rem;">Categoria:</label>
+            <select id="filter-search-category" class="form-select" style="padding: 6px 10px; font-size: 0.82rem;">
+              <option value="tutte">Tutte le Categorie</option>
+              <option value="politica">Politica</option>
+              <option value="sport">Sport</option>
+              <option value="religione">Religione Cattolica</option>
+              <option value="ricerca">Ricerca Scientifica</option>
+              <option value="economia">Economia</option>
+              <option value="medicina">Medicina e Salute</option>
+              <option value="interazioni">Interazioni Umane</option>
+              <option value="romagna">Territorio Romagna</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="form-label" style="font-size: 0.74rem;">Tipologia Documento:</label>
+            <select id="filter-search-doctype" class="form-select" style="padding: 6px 10px; font-size: 0.82rem;">
+              <option value="tutti">Tutte le Tipologie</option>
+              <option value="Notizia">Notizia</option>
+              <option value="Articolo">Articolo di Approfondimento</option>
+              <option value="Studio scientifico">Studio Scientifico</option>
+              <option value="Pubblicazione accademica">Pubblicazione Accademica</option>
+              <option value="Documento istituzionale">Documento Istituzionale</option>
+              <option value="Opinione">Opinione / Commento</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="form-label" style="font-size: 0.74rem;">Ordinamento:</label>
+            <select id="filter-search-sort" class="form-select" style="padding: 6px 10px; font-size: 0.82rem;">
+              <option value="relevance_desc">⚡ Rilevanza Decrescente</option>
+              <option value="published_desc">📅 Più Recente</option>
+              <option value="published_asc">📅 Meno Recente</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="form-label" style="font-size: 0.74rem;">Filtro Temporale:</label>
+            <div style="display: flex; gap: 4px;">
+              <button class="cat-btn-action quick-date-btn active" data-days="0">Tutto</button>
+              <button class="cat-btn-action quick-date-btn" data-days="1">24h</button>
+              <button class="cat-btn-action quick-date-btn" data-days="7">7gg</button>
+              <button class="cat-btn-action quick-date-btn" data-days="30">30gg</button>
+            </div>
+          </div>
+
+          <div>
+            <button id="btn-reset-search-filters" class="btn btn-secondary btn-sm" style="width: 100%; height: 32px; font-size: 0.78rem; display: flex; align-items: center; justify-content: center; gap: 6px;" title="Ripristina filtri predefiniti">
+              <span>🔄</span> Azzera Filtri
+            </button>
+          </div>
+        </div>
+
+        <!-- Risultati Ricerca -->
+        <div id="search-results-list" class="articles-full-list">
+          <!-- Caricati dinamicamente da search.js -->
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========================================== -->
+    <!-- 4. VISTA IMPOSTAZIONI E GESTIONE FONTI     -->
+    <!-- ========================================== -->
+    <section id="view-settings" class="view-section">
+      <div class="archive-main-content" style="max-width: 1200px; margin: 0 auto;">
+        
+        <div class="archive-view-header">
+          <div class="archive-title-group">
+            <h2>Impostazioni e Gestione Fonti</h2>
+            <p>Configura il motore di ricerca, gestisci le fonti per categoria, scheduler e backup</p>
+          </div>
+          <button class="btn btn-primary" onclick="SettingsView.openWizard()">
+            ➕ Aggiungi Nuova Fonte (Procedura Guidata)
+          </button>
+        </div>
+
+        <!-- Sub-tabs Impostazioni -->
+        <div style="display: flex; gap: 8px; margin-bottom: 20px; border-bottom: 1px solid var(--border-color); padding-bottom: 8px;">
+          <button class="btn btn-secondary settings-subtab-btn active" data-target="panel-sources">
+            📡 Fonti per Categoria
+          </button>
+          <button class="btn btn-secondary settings-subtab-btn" data-target="panel-scheduler">
+            ⏰ Scheduler & Automatismo (06:00)
+          </button>
+          <button class="btn btn-secondary settings-subtab-btn" data-target="panel-backup">
+            💾 Backup & Ripristino Dati
+          </button>
+          <button class="btn btn-secondary settings-subtab-btn" data-target="panel-logs">
+            📋 Registro Storico Aggiornamenti
+          </button>
+        </div>
+
+        <!-- PANNELLO 1: FONTI PER CATEGORIA -->
+        <div id="panel-sources" class="settings-tab-panel">
+          <div id="settings-category-chips" class="category-filter-chips" style="margin-bottom: 16px;">
+            <button class="cat-chip active" data-cat="politica">🏛️ Politica</button>
+            <button class="cat-chip" data-cat="sport">🏅 Sport</button>
+            <button class="cat-chip" data-cat="religione">✝️ Religione</button>
+            <button class="cat-chip" data-cat="ricerca">🔬 Ricerca Scientifica</button>
+            <button class="cat-chip" data-cat="economia">📈 Economia</button>
+            <button class="cat-chip" data-cat="medicina">🩺 Medicina e Salute</button>
+            <button class="cat-chip" data-cat="interazioni">🧠 Interazioni Umane</button>
+            <button class="cat-chip" data-cat="romagna">📍 Territorio Romagna</button>
+          </div>
+
+          <h3 id="settings-cat-title" style="font-size: 1.05rem; margin-bottom: 12px;">Fonti Configurate</h3>
+          <div id="sources-list-container">
+            <!-- Tabella fonti caricata dinamicamente -->
+          </div>
+        </div>
+
+        <!-- PANNELLO 2: SCHEDULER AUTOMATICO -->
+        <div id="panel-scheduler" class="settings-tab-panel" style="display: none;">
+          <div style="background: var(--bg-surface); padding: 24px; border-radius: var(--radius-md); max-width: 600px; border: 1px solid var(--border-color);">
+            <h3 style="margin-bottom: 14px;">Pianificazione Aggiornamento Automatico Giornaliero</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 18px;">
+              L'aggiornamento automatico opera lato server e consulta tutte le fonti anche con il browser chiuso.
+              Orario predefinito raccomandato: <strong>ORE 06:00 – FUSO ORARIO EUROPE/ROME</strong>.
+            </p>
+
+            <div class="form-group">
+              <label class="form-label">Orario di Esecuzione Giornaliera (HH:MM):</label>
+              <input type="time" id="scheduler-time" class="form-input" value="06:00">
+            </div>
+
+            <div class="form-group" style="display: flex; align-items: center; gap: 10px;">
+              <input type="checkbox" id="scheduler-enabled" checked style="width: 18px; height: 18px;">
+              <label for="scheduler-enabled" style="font-weight: 600; font-size: 0.9rem; cursor: pointer;">
+                Abilita scansione automatica giornaliera
+              </label>
+            </div>
+
+            <button class="btn btn-primary" onclick="SettingsView.saveSchedulerSettings()">
+              💾 Salva Impostazioni Scheduler
+            </button>
+          </div>
+        </div>
+
+        <!-- PANNELLO 3: BACKUP E RIPRISTINO -->
+        <div id="panel-backup" class="settings-tab-panel" style="display: none;">
+          <div style="background: var(--bg-surface); padding: 24px; border-radius: var(--radius-md); max-width: 700px; border: 1px solid var(--border-color);">
+            <h3 style="margin-bottom: 12px;">Salvataggio, Backup e Recupero Dati</h3>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 18px;">
+              Il database SQLite è permanente e risiede nella directory dedicata sul server.
+              Puoi generare backup completi istantanei in formato JSON o ripristinare uno stato precedente con 1 clic.
+            </p>
+
+            <button class="btn btn-primary" onclick="SettingsView.createBackup()" style="margin-bottom: 20px;">
+              💾 Crea Nuovo Backup Immediato
+            </button>
+
+            <h4 style="font-size: 0.95rem; margin-bottom: 10px;">Punti di Ripristino Disponibili:</h4>
+            <div id="backups-list">
+              <!-- Lista backup caricata dinamicamente -->
+            </div>
+          </div>
+        </div>
+
+        <!-- PANNELLO 4: LOG STORICO -->
+        <div id="panel-logs" class="settings-tab-panel" style="display: none;">
+          <h3 style="font-size: 1.05rem; margin-bottom: 12px;">Registro Esecuzioni e Aggiornamenti</h3>
+          <div id="logs-history-container">
+            <!-- Caricato dinamicamente -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODALE: AGGIUNTA RAPIDA FONTE PER CATEGORIA               -->
+  <!-- ======================================================== -->
+  <div id="modal-quick-add-source" class="modal-overlay">
+    <div class="modal-content-window" style="max-width: 640px;">
+      
+      <div class="modal-header">
+        <div>
+          <h3 style="font-size: 1.18rem; font-weight: 800;">➕ Aggiungi Nuova Fonte di Ricerca</h3>
+          <div style="font-size: 0.8rem; color: var(--text-dim); margin-top: 2px;">
+            Categoria di destinazione: <strong id="quick-add-cat-name" style="color: #38bdf8;">-</strong>
+          </div>
+        </div>
+        <button class="btn-icon-only" onclick="App.closeQuickAddSource()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="quick-add-cat-id">
+
+        <div class="form-group">
+          <label class="form-label">Indirizzo Web o Link della Fonte (URL completo):</label>
+          <div style="display: flex; gap: 8px;">
+            <input
+              type="url"
+              id="quick-add-url"
+              class="form-input"
+              placeholder="es. https://www.ilrestodelcarlino.it oppure link feed RSS..."
+              style="flex: 1;"
+            >
+            <button class="btn btn-secondary" id="btn-quick-probe" onclick="App.probeQuickAddUrl()" style="white-space: nowrap;">
+              🔍 Verifica Link
+            </button>
+          </div>
+          <div class="form-help">
+            Puoi inserire qualsiasi link web, testata giornalistica o feed RSS. Il motore rileverà o adatterà automaticamente il flusso di notizie.
+          </div>
+        </div>
+
+        <div id="quick-add-probe-box" class="probe-status-box" style="display: none; margin-bottom: 16px;"></div>
+
+        <div class="form-group">
+          <label class="form-label">Nome della Fonte:</label>
+          <input
+            type="text"
+            id="quick-add-name"
+            class="form-input"
+            placeholder="es. Il Resto del Carlino / Rivista Scientifica / Portale Locale"
+          >
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 14px;">
+          <div class="form-group">
+            <label class="form-label">Tipologia di Documento:</label>
+            <select id="quick-add-doctype" class="form-select">
+              <option value="Notizia">Notizia Giornalistica</option>
+              <option value="Articolo">Articolo di Approfondimento</option>
+              <option value="Studio scientifico">Studio Scientifico / Paper</option>
+              <option value="Pubblicazione accademica">Pubblicazione Accademica</option>
+              <option value="Documento istituzionale">Documento Istituzionale</option>
+              <option value="Documento ecclesiale">Documento Ecclesiale</option>
+              <option value="Opinione">Opinione / Commento</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Parole Chiave da Monitorare (opzionale):</label>
+            <input
+              type="text"
+              id="quick-add-keywords"
+              class="form-input"
+              placeholder="es. Forlì, Cesena, riforme..."
+            >
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="justify-content: space-between; flex-wrap: wrap; gap: 10px;">
+        <button class="btn btn-secondary" onclick="App.openFullWizardFromQuick()">
+          ⚙️ Procedura Guidata (7 Passaggi)
+        </button>
+        <div style="display: flex; gap: 10px;">
+          <button class="btn btn-secondary" onclick="App.closeQuickAddSource()">Annulla</button>
+          <button class="btn btn-primary" id="btn-save-quick-source" onclick="App.saveQuickAddSource()">
+            💾 Salva e Cerca Subito
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODALE: PROCEDURA GUIDATA IN 7 PASSAGGI (NUOVA FONTE)   -->
+  <!-- ======================================================== -->
+  <div id="modal-wizard-source" class="modal-overlay">
+    <div class="modal-content-window">
+      
+      <div class="modal-header">
+        <h3>Procedura Guidata Inserimento Fonte di Intelligence</h3>
+        <button class="btn-icon-only" onclick="SettingsView.closeWizard()">✕</button>
+      </div>
+
+      <div class="modal-body">
+        <!-- Tracker Grafico dei 7 Passaggi -->
+        <div class="wizard-steps-tracker">
+          <div id="step-node-1" class="wizard-step-node active">
+            <div class="step-circle">1</div>
+            <div class="step-label">Categoria</div>
+          </div>
+          <div id="step-node-2" class="wizard-step-node">
+            <div class="step-circle">2</div>
+            <div class="step-label">URL Fonte</div>
+          </div>
+          <div id="step-node-3" class="wizard-step-node">
+            <div class="step-circle">3</div>
+            <div class="step-label">Verifica</div>
+          </div>
+          <div id="step-node-4" class="wizard-step-node">
+            <div class="step-circle">4</div>
+            <div class="step-label">Tipologia</div>
+          </div>
+          <div id="step-node-5" class="wizard-step-node">
+            <div class="step-circle">5</div>
+            <div class="step-label">Parole Chiave</div>
+          </div>
+          <div id="step-node-6" class="wizard-step-node">
+            <div class="step-circle">6</div>
+            <div class="step-label">Test Ricerca</div>
+          </div>
+          <div id="step-node-7" class="wizard-step-node">
+            <div class="step-circle">7</div>
+            <div class="step-label">Salvataggio</div>
+          </div>
+        </div>
+
+        <!-- CONTENUTO PASSAGGI -->
+
+        <!-- PASSAGGIO 1: Selezione Categoria -->
+        <div id="wizard-step-1" class="wizard-step-content active-step">
+          <h4 style="margin-bottom: 8px;">PASSAGGIO 1 – Selezione della Categoria di Destinazione</h4>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 16px;">
+            Scegli il contenitore tematico in cui catalogare e archiviare automaticamente le informazioni estratte.
+          </p>
+          <div class="form-group">
+            <label class="form-label">Categoria:</label>
+            <select id="wz-category" class="form-select">
+              <option value="politica">POLITICA (Istituzioni, Geopolitica, Governi)</option>
+              <option value="sport">SPORT (Ciclismo, Atletica, Fisiologia, Preparazione)</option>
+              <option value="religione">RELIGIONE CATTOLICA (Vaticano, Teologia, Magistero)</option>
+              <option value="ricerca">RICERCA SCIENTIFICA (IA, Neuroscienze, Fisica, Università)</option>
+              <option value="economia">ECONOMIA (Mercati, Imprese, Finanza, Lavoro)</option>
+              <option value="medicina">MEDICINA E SALUTE (Oncologia, Longevità, Clinica)</option>
+              <option value="interazioni">INTERAZIONI UMANE E CRESCITA PERSONALE (Psicologia, Comunicazione)</option>
+              <option value="romagna">NEWS TERRITORIO ROMAGNA (Forlì, Cesena, Faenza, Romagna)</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- PASSAGGIO 2: Inserimento Nome e URL -->
+        <div id="wizard-step-2" class="wizard-step-content">
+          <h4 style="margin-bottom: 8px;">PASSAGGIO 2 – Inserimento Denominazione e Indirizzo Web</h4>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 16px;">
+            Indica il nome formale della testata, ente o portale e l'URL (Feed RSS, endpoint API o pagina web).
+          </p>
+          <div class="form-group">
+            <label class="form-label">Nome Fonte:</label>
+            <input type="text" id="wz-name" class="form-input" placeholder="Es. Rivista Scientifica / Portale Notizie">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Indirizzo Web (URL Completo):</label>
+            <input type="url" id="wz-url" class="form-input" placeholder="https://esempio.it/feed.xml">
+          </div>
+        </div>
+
+        <!-- PASSAGGIO 3: Verifica Raggiungibilità -->
+        <div id="wizard-step-3" class="wizard-step-content">
+          <h4 style="margin-bottom: 8px;">PASSAGGIO 3 – Verifica Raggiungibilità e Connessione</h4>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 16px;">
+            Il backend interroga la sorgente per confermare la corretta accessibilità e rilevare protocolli attivi.
+          </p>
+          <div id="wz-probe-box" class="probe-status-box">
+            <!-- Risultato test probe -->
+          </div>
+        </div>
+
+        <!-- PASSAGGIO 4: Riconoscimento Tipologia Fonte -->
+        <div id="wizard-step-4" class="wizard-step-content">
+          <h4 style="margin-bottom: 8px;">PASSAGGIO 4 – Riconoscimento Tipologia Fonte e Documento</h4>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 16px;">
+            Definisci come il motore deve classificare i contenuti raccolti da questa fonte.
+          </p>
+          <div class="form-group">
+            <label class="form-label">Protocollo Tecnico Fonte:</label>
+            <select id="wz-type" class="form-select">
+              <option value="rss">Feed RSS / Atom Standard</option>
+              <option value="google_news">Google News Feed / Query</option>
+              <option value="openalex">OpenAlex Academic API (Studi Internazionali)</option>
+              <option value="pubmed">PubMed / NCBI API (Medicina e Salute)</option>
+              <option value="web">Pagina Web Istituzionale</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Tipologia Prevalente Documento:</label>
+            <select id="wz-doctype" class="form-select">
+              <option value="Notizia">Notizia Giornalistica</option>
+              <option value="Articolo">Articolo di Approfondimento</option>
+              <option value="Studio scientifico">Studio Scientifico / Paper</option>
+              <option value="Pubblicazione accademica">Pubblicazione Accademica</option>
+              <option value="Documento istituzionale">Documento Istituzionale</option>
+              <option value="Documento ecclesiale">Documento Ecclesiale</option>
+              <option value="Opinione">Opinione ed Editoriale</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- PASSAGGIO 5: Inserimento Parole Chiave -->
+        <div id="wizard-step-5" class="wizard-step-content">
+          <h4 style="margin-bottom: 8px;">PASSAGGIO 5 – Inserimento Parole Chiave da Monitorare ed Escludere</h4>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 16px;">
+            Configura i filtri tematici per affinare la precisione di archiviazione.
+          </p>
+          <div class="form-group">
+            <label class="form-label">Parole Chiave da Monitorare (separate da virgola):</label>
+            <input type="text" id="wz-keywords" class="form-input" placeholder="es. riforme, intelligenza artificiale, Forlì, prevenzione">
+            <div class="form-help">Queste parole aumentano il punteggio di rilevanza dell'intelligence.</div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Parole Chiave da Escludere (separate da virgola):</label>
+            <input type="text" id="wz-exclude" class="form-input" placeholder="es. gossip, oroscopo, pubblicità, sponsor">
+            <div class="form-help">Gli articoli contenenti questi termini verranno scartati automaticamente.</div>
+          </div>
+        </div>
+
+        <!-- PASSAGGIO 6: Test della Ricerca -->
+        <div id="wizard-step-6" class="wizard-step-content">
+          <h4 style="margin-bottom: 8px;">PASSAGGIO 6 – Test della Ricerca ed Estrazione</h4>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 16px;">
+            Anteprima degli articoli e dei dati campionati dalla fonte:
+          </p>
+          <div id="wz-preview-container">
+            <!-- Anteprima campioni estratti -->
+          </div>
+        </div>
+
+        <!-- PASSAGGIO 7: Salvataggio -->
+        <div id="wizard-step-7" class="wizard-step-content">
+          <h4 style="margin-bottom: 8px;">PASSAGGIO 7 – Salvataggio e Attivazione</h4>
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 16px;">
+            Verifica il riepilogo della configurazione e conferma l'aggiunta al motore di intelligence:
+          </p>
+          <div id="wz-summary-box">
+            <!-- Riepilogo finale -->
+          </div>
+        </div>
+
+      </div>
+
+      <div class="modal-footer">
+        <button id="wz-btn-prev" class="btn btn-secondary" onclick="SettingsView.prevWizardStep()" style="display:none;">
+          ⬅️ Indietro
+        </button>
+        <button id="wz-btn-next" class="btn btn-primary" onclick="SettingsView.nextWizardStep()">
+          Avanti ➔
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- VIEW: ANDROID / ACCESSO REMOTO -->
+  <section id="view-android" class="view-section">
+    <div style="max-width:860px;margin:0 auto;padding:0 0 60px;">
+
+      <div style="text-align:center;padding:40px 20px 28px;">
+        <div style="font-size:3.5rem;margin-bottom:12px;">📱</div>
+        <h2 style="font-size:1.6rem;font-weight:800;margin-bottom:8px;">Installa su Android &amp; Accesso Remoto</h2>
+        <p style="color:var(--text-dim);font-size:0.9rem;max-width:560px;margin:0 auto;">
+          Accedi a NEWS INTELLIGENCE HUB dal tuo telefono, tablet o da qualsiasi PC esterno tramite tunnel HTTPS sicuro.
+        </p>
+      </div>
+
+      <!-- STEP 1: Avvia il tunnel -->
+      <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#0ea5e9);color:#000;font-weight:900;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">1</div>
+          <div>
+            <h3 style="font-size:1.05rem;font-weight:700;margin:0;">Avvia il server e il tunnel internet</h3>
+            <p style="font-size:0.82rem;color:var(--text-dim);margin:4px 0 0;">Sul PC dove gira l'app, fai doppio clic su questo file:</p>
+          </div>
+        </div>
+        <div style="background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:14px 18px;font-family:monospace;font-size:0.95rem;color:#4ade80;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;">
+          <span>📂 avvia_accesso_remoto.bat</span>
+          <span style="font-size:0.75rem;color:var(--text-dim);font-family:sans-serif;">Nella cartella NEWS HUB</span>
+        </div>
+        <p style="font-size:0.82rem;color:var(--text-dim);margin:12px 0 0;">
+          ⏳ Dopo 10-20 secondi apparirà un indirizzo HTTPS nella finestra nera (es. <code style="color:#38bdf8;">https://f8ee84dfa28117.lhr.life</code>). <strong>Copialo.</strong>
+        </p>
+      </div>
+
+      <!-- STEP 2: Apri dal telefono -->
+      <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#4ade80,#22c55e);color:#000;font-weight:900;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">2</div>
+          <div>
+            <h3 style="font-size:1.05rem;font-weight:700;margin:0;">Apri sul telefono</h3>
+            <p style="font-size:0.82rem;color:var(--text-dim);margin:4px 0 0;">Dal telefono Android o iPhone, apri Chrome e incolla l'URL copiato.</p>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
+          <div style="background:var(--bg-surface);border-radius:var(--radius-md);padding:14px;text-align:center;">
+            <div style="font-size:2rem;margin-bottom:6px;">🌐</div>
+            <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">Chrome per Android</div>
+            <div style="font-size:0.78rem;color:var(--text-dim);">Incolla l'URL nella barra indirizzi</div>
+          </div>
+          <div style="background:var(--bg-surface);border-radius:var(--radius-md);padding:14px;text-align:center;">
+            <div style="font-size:2rem;margin-bottom:6px;">🦊</div>
+            <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">Firefox Mobile</div>
+            <div style="font-size:0.78rem;color:var(--text-dim);">Funziona anche con Firefox</div>
+          </div>
+          <div style="background:var(--bg-surface);border-radius:var(--radius-md);padding:14px;text-align:center;">
+            <div style="font-size:2rem;margin-bottom:6px;">💻</div>
+            <div style="font-weight:700;font-size:0.9rem;margin-bottom:4px;">PC esterno</div>
+            <div style="font-size:0.78rem;color:var(--text-dim);">Stesso URL da qualsiasi PC</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- STEP 3: Installa come App (PWA) -->
+      <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px;border-left:4px solid #4ade80;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#a78bfa,#7c3aed);color:#fff;font-weight:900;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">3</div>
+          <div>
+            <h3 style="font-size:1.05rem;font-weight:700;margin:0;">📲 Installa come App sul telefono (consigliato)</h3>
+            <p style="font-size:0.82rem;color:var(--text-dim);margin:4px 0 0;">Aggiungi l'icona alla schermata Home — funziona come un'app nativa, senza installare nulla.</p>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;">
+          <!-- Android -->
+          <div style="background:var(--bg-surface);border-radius:var(--radius-md);padding:16px;">
+            <div style="font-weight:700;color:#4ade80;margin-bottom:12px;font-size:0.9rem;">🤖 Android (Chrome)</div>
+            <ol style="margin:0;padding-left:18px;font-size:0.82rem;line-height:1.9;color:var(--text-muted);">
+              <li>Apri l'URL in <strong>Chrome</strong></li>
+              <li>Tocca i <strong>tre puntini</strong> ⋮ in alto a destra</li>
+              <li>Seleziona <strong>"Aggiungi a schermata Home"</strong></li>
+              <li>Tocca <strong>"Aggiungi"</strong> nella finestra di conferma</li>
+              <li>L'icona 📰 apparirà nella schermata Home!</li>
+            </ol>
+          </div>
+          <!-- iPhone -->
+          <div style="background:var(--bg-surface);border-radius:var(--radius-md);padding:16px;">
+            <div style="font-weight:700;color:#38bdf8;margin-bottom:12px;font-size:0.9rem;">🍎 iPhone (Safari)</div>
+            <ol style="margin:0;padding-left:18px;font-size:0.82rem;line-height:1.9;color:var(--text-muted);">
+              <li>Apri l'URL in <strong>Safari</strong></li>
+              <li>Tocca il tasto <strong>Condividi</strong> ↑ in basso</li>
+              <li>Scorri e seleziona <strong>"Aggiungi a schermata Home"</strong></li>
+              <li>Tocca <strong>"Aggiungi"</strong> in alto a destra</li>
+              <li>L'icona apparirà nella schermata Home!</li>
+            </ol>
+          </div>
+        </div>
+
+        <div style="margin-top:14px;padding:12px 16px;background:rgba(74,222,128,0.08);border-radius:var(--radius-sm);border:1px solid rgba(74,222,128,0.2);">
+          <p style="font-size:0.8rem;color:#4ade80;margin:0;font-weight:600;">
+            ✅ Questo metodo è equivalente a un'app installata: si apre a schermo intero, ha la sua icona e funziona come un'app nativa Android/iOS.
+          </p>
+        </div>
+      </div>
+
+      <!-- STEP 4: APK vero con PWABuilder -->
+      <div style="background:var(--bg-card);border:1px solid var(--border-color);border-radius:var(--radius-lg);padding:24px;margin-bottom:20px;">
+        <div style="display:flex;align-items:center;gap:14px;margin-bottom:16px;">
+          <div style="width:40px;height:40px;border-radius:50%;background:linear-gradient(135deg,#fb923c,#ea580c);color:#fff;font-weight:900;font-size:1.1rem;display:flex;align-items:center;justify-content:center;flex-shrink:0;">4</div>
+          <div>
+            <h3 style="font-size:1.05rem;font-weight:700;margin:0;">📦 Crea un file APK vero (opzionale)</h3>
+            <p style="font-size:0.82rem;color:var(--text-dim);margin:4px 0 0;">Se vuoi un file <code>.apk</code> da installare senza connessione internet.</p>
+          </div>
+        </div>
+        <div style="font-size:0.85rem;line-height:1.8;color:var(--text-muted);">
+          <p><strong>Strumento gratuito:</strong> <a href="https://www.pwabuilder.com" target="_blank" rel="noopener" style="color:var(--primary);">pwabuilder.com</a> — crea un APK automaticamente dall'URL della tua app.</p>
+          <p><strong>Come fare:</strong></p>
+          <ol style="padding-left:20px;margin:8px 0;">
+            <li>Avvia il tunnel con <code>avvia_accesso_remoto.bat</code></li>
+            <li>Copia l'URL HTTPS generato (es. <code>https://xxxx.lhr.life</code>)</li>
+            <li>Vai su <a href="https://www.pwabuilder.com" target="_blank" rel="noopener" style="color:var(--primary);">pwabuilder.com</a></li>
+            <li>Incolla l'URL e clicca <strong>"Start"</strong></li>
+            <li>Clicca <strong>"Android"</strong> → <strong>"Generate Package"</strong></li>
+            <li>Scarica il file <code>.apk</code> e installalo sul telefono</li>
+          </ol>
+          <div style="margin-top:12px;padding:10px 14px;background:rgba(251,146,60,0.08);border-radius:var(--radius-sm);border:1px solid rgba(251,146,60,0.2);">
+            <p style="font-size:0.78rem;color:#fb923c;margin:0;">
+              ⚠️ Per installare l'APK su Android: vai in <strong>Impostazioni → Sicurezza → Sorgenti sconosciute</strong> e abilita l'installazione da sorgenti esterne.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Note tecniche -->
+      <div style="background:var(--bg-surface);border:1px solid var(--border-color);border-radius:var(--radius-md);padding:18px;font-size:0.8rem;color:var(--text-dim);line-height:1.8;">
+        <div style="font-weight:700;color:var(--text-muted);margin-bottom:8px;">ℹ️ Note tecniche</div>
+        <ul style="margin:0;padding-left:18px;">
+          <li>Il tunnel <strong>localhost.run</strong> è gratuito ma l'URL cambia ad ogni avvio</li>
+          <li>Il tunnel funziona solo mentre la finestra <code>avvia_accesso_remoto.bat</code> è aperta</li>
+          <li>Per un URL fisso e stabile considera <a href="https://admin.localhost.run" target="_blank" rel="noopener" style="color:var(--primary);">localhost.run Premium</a> o <a href="https://ngrok.com" target="_blank" rel="noopener" style="color:var(--primary);">ngrok</a></li>
+          <li>I dati rimangono sul tuo PC — nessuna sincronizzazione cloud, massima privacy</li>
+          <li>Per accesso da rete locale (WiFi di casa): usa <code>http://192.168.1.17:3000</code> senza tunnel</li>
+        </ul>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- SCRIPTS -->
+  <script src="/js/api.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/archive.js"></script>
+  <script src="/js/search.js"></script>
+  <script src="/js/settings.js"></script>
+
+</body>
+</html>

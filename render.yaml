@@ -1,0 +1,10 @@
+services:
+  - type: web
+    name: news-intelligence-hub
+    env: docker
+    dockerfilePath: Dockerfile
+    plan: free
+    region: frankfurt
+    envVars:
+      - key: PORT
+        value: 10000
