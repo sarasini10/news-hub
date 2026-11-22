@@ -9,8 +9,7 @@ COPY package.json ./
 
 # Copia i file del server e del frontend
 COPY server/ ./server/
-COPY public/ ./public/
-COPY data/ ./data/
+COPY public/ ./public
 
 # Crea directory dati se non presente
 RUN mkdir -p /app/data/backups
